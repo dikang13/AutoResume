@@ -8,3 +8,40 @@ wheels/
 
 # Virtual environments
 .venv
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.local
+
+# Output files (modified resumes and cover letters)
+*_modified.tex
+cover_letter.tex
+cover_letter.txt
+
+# LaTeX auxiliary files
+*.aux
+*.log
+*.out
+*.toc
+*.pdf
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# LangSmith
+.langsmith/
