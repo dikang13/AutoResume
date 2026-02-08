@@ -17,6 +17,7 @@ from ..tools.latex_parser import (
     validate_latex_syntax,
     extract_text_content
 )
+from ..utils.user_profiles import UserProfileManager, UserProfile
 from .prompts import SYSTEM_PROMPT
 
 
@@ -74,6 +75,11 @@ class ResumeAgent:
         self.resume_content = None
         self.resume_path = None
         self.user_context = {}
+
+        # User profile management
+        self.profile_manager = UserProfileManager()
+        self.current_profile: Optional[UserProfile] = None
+        self.conversation_notes = []
 
         # Create tools
         self.tools = self._create_tools()
@@ -136,13 +142,44 @@ class ResumeAgent:
                 return f"Error reading resume: {str(e)}"
 
         @tool
+        def get_full_resume_content() -> str:
+            """
+            Get the complete LaTeX content of the resume that was previously loaded.
+            Use this when you're ready to modify the resume and need the full content.
+
+            Returns:
+                The complete LaTeX content of the resume
+            """
+            if self.resume_content is None:
+                return "Error: No resume has been loaded yet. Use read_resume first."
+
+            return f"Full resume content:\n\n{self.resume_content.raw_content}"
+
+        @tool
         def save_modified_resume(new_content: str, output_path: str) -> str:
             """
             Save a modified resume after validating LaTeX syntax.
 
+            CRITICAL WORKFLOW:
+            1. First, call get_full_resume_content() to get the original LaTeX
+            2. Take that content and make your modifications to it (in your response)
+            3. Then call THIS tool with the COMPLETE modified document
+
+            IMPORTANT: You MUST provide BOTH parameters:
+            - new_content: The COMPLETE modified LaTeX document (entire file from \\documentclass to \\end{document})
+            - output_path: Where to save it
+
+            DO NOT call this tool with just output_path! You must construct the full modified
+            document first and pass it as new_content.
+
+            Example:
+            1. Get content: full_content = get_full_resume_content()
+            2. Modify it: modified_content = (take full_content and change relevant sections)
+            3. Save it: save_modified_resume(new_content=modified_content, output_path="resume_modified.tex")
+
             Args:
-                new_content: The modified LaTeX content
-                output_path: Path where to save the modified resume
+                new_content: The COMPLETE modified LaTeX content (entire document) - REQUIRED
+                output_path: Path where to save the modified resume - REQUIRED
 
             Returns:
                 Success or error message
@@ -167,8 +204,11 @@ class ResumeAgent:
             Ask the user a clarifying question to get information not in the resume.
             Use this to avoid making up information.
 
+            IMPORTANT: Ask only ONE question at a time. After calling this tool, wait for
+            the response before asking additional questions. This creates a natural conversation flow.
+
             Args:
-                question: The question to ask the user
+                question: A single, specific question to ask the user
 
             Returns:
                 The user's response
@@ -200,12 +240,48 @@ class ResumeAgent:
             except Exception as e:
                 return f"Error saving cover letter: {str(e)}"
 
+        @tool
+        def save_user_info(
+            experiences: Optional[str] = None,
+            skills: Optional[str] = None,
+            note: Optional[str] = None
+        ) -> str:
+            """
+            Save information learned about the user for future sessions.
+            Use this when the user shares details about their experience, skills, or preferences.
+
+            Args:
+                experiences: Description of work experience (e.g., "3 years of Python development at XYZ Corp")
+                skills: Skills to remember (e.g., "React, Docker, AWS")
+                note: General note to remember (e.g., "Prefers concise bullet points")
+
+            Returns:
+                Confirmation message
+            """
+            if self.current_profile is None:
+                return "No user profile active. This shouldn't happen."
+
+            # Parse and add information
+            if experiences:
+                self.conversation_notes.append(f"Experience: {experiences}")
+
+            if skills:
+                skill_list = [s.strip() for s in skills.split(",")]
+                self.conversation_notes.append(f"Skills: {', '.join(skill_list)}")
+
+            if note:
+                self.conversation_notes.append(note)
+
+            return "Information saved to your profile for future sessions."
+
         return [
             fetch_job_from_url,
             read_resume,
+            get_full_resume_content,
             save_modified_resume,
             ask_user_question,
-            save_cover_letter
+            save_cover_letter,
+            save_user_info
         ]
 
     def _create_agent(self) -> AgentExecutor:
@@ -258,26 +334,63 @@ class ResumeAgent:
         except Exception as e:
             return {"error": f"Failed to read job URL: {str(e)}"}
 
+        # Load or create user profile
+        resume_abs_path = str(Path(resume_path).resolve())
+        self.current_profile = self.profile_manager.find_profile_by_resume(resume_abs_path)
+
+        profile_info = ""
+        if self.current_profile:
+            profile_info = f"\n\nUSER PROFILE (from previous sessions):\n"
+            if self.current_profile.name:
+                profile_info += f"Name: {self.current_profile.name}\n"
+            if self.current_profile.skills:
+                profile_info += f"Known Skills: {', '.join(self.current_profile.skills[:10])}\n"
+            if self.current_profile.notes:
+                profile_info += f"Notes: {'; '.join(self.current_profile.notes[-5:])}\n"
+            profile_info += "\nUse this information as context but always verify with the user if unsure.\n"
+        else:
+            # Create new profile
+            user_id = Path(resume_path).stem
+            self.current_profile = self.profile_manager.create_profile(
+                user_id=user_id,
+                resume_path=resume_abs_path
+            )
+            profile_info = "\n\n(First time working with this resume - learning about you as we go)\n"
+
         # Construct the initial prompt
-        initial_prompt = f"""I need help tailoring my resume and creating a cover letter for a job application.
+        initial_prompt = f"""I need help tailoring my resume and creating a cover letter for a job application.{profile_info}
 
 Resume file: {resume_path}
 Job URL: {job_url}
 
-Please:
+Please follow this workflow:
 1. Fetch and analyze the job description
-2. Read and understand my resume
-3. Ask me any clarifying questions about my experience if needed
-4. Suggest modifications to tailor the resume for this job
-5. Generate a personalized cover letter
+2. Read and understand my resume structure
+3. Ask me any clarifying questions about my experience if needed (ONE question at a time)
+4. Use get_full_resume_content to get the complete LaTeX document
+5. Based on the job requirements and my answers, mentally plan the modifications
+6. Construct the complete modified LaTeX document with your changes
+7. Save the modified resume:
+   CRITICAL: Call save_modified_resume with BOTH parameters:
+   - new_content: The ENTIRE modified LaTeX document (from \\documentclass to \\end{{document}})
+   - output_path: {output_resume}
+8. Generate and save a personalized cover letter to: {output_cover_letter}
 
-Save the modified resume to: {output_resume}
-Save the cover letter to: {output_cover_letter}
+IMPORTANT EXAMPLE FOR STEP 7:
+BAD:  save_modified_resume(output_path="{output_resume}")  ❌ Missing new_content!
+GOOD: save_modified_resume(new_content="<full modified LaTeX here>", output_path="{output_resume}")  ✓
 
 Remember: Only use information from my actual resume. If you need to know something about my experience, ask me!"""
 
         try:
             result = self.agent.invoke({"input": initial_prompt})
+
+            # Save updated profile with conversation notes
+            if self.current_profile and self.conversation_notes:
+                self.profile_manager.update_from_conversation(
+                    user_id=self.current_profile.user_id,
+                    notes=self.conversation_notes
+                )
 
             return {
                 "success": True,
@@ -286,6 +399,13 @@ Remember: Only use information from my actual resume. If you need to know someth
                 "cover_letter_path": output_cover_letter
             }
         except Exception as e:
+            # Still save profile notes even if there was an error
+            if self.current_profile and self.conversation_notes:
+                self.profile_manager.update_from_conversation(
+                    user_id=self.current_profile.user_id,
+                    notes=self.conversation_notes
+                )
+
             return {
                 "success": False,
                 "error": str(e)

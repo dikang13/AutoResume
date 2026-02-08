@@ -11,6 +11,9 @@ wheels/
 venv/
 env/
 
+# UV - DO NOT ignore uv.lock (it should be committed!)
+# uv.lock provides reproducible builds
+
 # Environment variables and secrets
 .env
 .env.local
@@ -19,6 +22,9 @@ env/
 *_modified.tex
 cover_letter.tex
 cover_letter.txt
+
+# User profiles (contains personal information)
+.user_profiles/
 
 # LaTeX auxiliary files
 *.aux

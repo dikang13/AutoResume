@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv pip install:*)",
+      "Bash(python:*)",
+      "Bash(uv pip list:*)",
+      "Bash(uv pip show:*)",
+      "Bash(.venv/Scripts/python.exe:*)",
+      "Bash(git add:*)",
+      "Bash(if [ -f .env ])",
+      "Bash(then grep ANTHROPIC_API_KEY .env)",
+      "Bash(else echo \"No .env file found\")",
+      "Bash(fi:*)",
+      "Bash(./run.bat run -r examples/cv_baseline.tex -j examples/job_url_20260207.txt)",
+      "Bash(.venv/Scripts/playwright.exe install:*)",
+      "Bash(uv lock:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv tree:*)",
+      "Bash(uv run python:*)"
+    ]
+  }
+}

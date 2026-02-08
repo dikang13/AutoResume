@@ -1,18 +1,35 @@
 [project]
 name = "autoresume"
-version = "0.1.0"
+version = "0.2.0"
 description = "LangChain agent for intelligent resume modification and cover letter generation"
 readme = "README.md"
 requires-python = ">=3.9"
+authors = [
+    { name = "AutoResume Contributors" }
+]
+license = { text = "MIT" }
+keywords = ["resume", "cover-letter", "ai", "langchain", "anthropic", "claude"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
 dependencies = [
-    "langchain>=0.1.0",
-    "langchain-anthropic>=0.1.0",
+    "langchain>=0.3.0",
+    "langchain-anthropic>=0.3.0",
     "beautifulsoup4>=4.12.0",
     "requests>=2.31.0",
     "pydantic>=2.0.0",
     "python-dotenv>=1.0.0",
     "rich>=13.0.0",
     "click>=8.1.0",
+    "lxml>=4.9.0",
 ]
 
 [project.optional-dependencies]
@@ -21,10 +38,40 @@ dev = [
     "black>=23.0.0",
     "ruff>=0.1.0",
 ]
+browser = [
+    "playwright>=1.40.0",
+]
+all = [
+    "autoresume[dev,browser]",
+]
 
 [project.scripts]
 autoresume = "main:cli"
 
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_backend"
+[dependency-groups]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

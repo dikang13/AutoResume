@@ -6,21 +6,56 @@ AutoResume is a conversational AI agent that helps you tailor your resume and ge
 
 ## Features
 
-- **Intelligent Job Analysis**: Fetches and analyzes job descriptions from URLs
+- **Intelligent Job Analysis**: Fetches and analyzes job descriptions from URLs (including JavaScript-rendered pages)
 - **Resume Tailoring**: Modifies your LaTeX resume to emphasize relevant experience
 - **Cover Letter Generation**: Creates personalized cover letters based on your resume
-- **Conversational Interface**: Asks clarifying questions instead of making assumptions
+- **Conversational Interface**: Asks clarifying questions ONE AT A TIME for natural conversation flow
+- **User Memory**: Remembers your experience, skills, and preferences across sessions
 - **LaTeX Preservation**: Maintains your resume's formatting and structure
 - **No Hallucination**: Only works with information explicitly in your resume
+- **Dynamic Page Support**: Works with JavaScript-rendered job pages (Apple, LinkedIn, etc.)
 
 ## Installation
 
 ### Prerequisites
 
 - Python 3.9 or higher
+- [UV](https://docs.astral.sh/uv/) (recommended) or pip
 - Anthropic API key ([get one here](https://console.anthropic.com/))
 
-### Setup
+### Quick Start with UV (Recommended)
+
+UV is 10-100x faster than pip and provides fully reproducible environments.
+
+1. **Install UV:**
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+2. **Clone and setup:**
+```bash
+git clone <repo-url>
+cd AutoResume
+
+# Install all dependencies (including browser support)
+uv sync --all-extras
+
+# Install Chromium for JavaScript pages
+uv run playwright install chromium
+```
+
+3. **Configure API key:**
+```bash
+uv run python main.py setup
+```
+
+**That's it!** See [UV_SETUP.md](UV_SETUP.md) for detailed UV usage.
+
+### Alternative: Traditional pip Installation
 
 1. Clone or download this repository
 
@@ -40,17 +75,34 @@ cp .env.example .env
 # Edit .env and add your ANTHROPIC_API_KEY
 ```
 
+4. **Optional:** JavaScript page support:
+```bash
+pip install playwright
+playwright install chromium
+```
+
 ## Usage
 
 ### Basic Usage
 
+**With UV (recommended):**
 ```bash
-python main.py run -r path/to/resume.tex -j path/to/job_url.txt
+uv run python main.py run -r path/to/resume.tex -j path/to/job_url.txt
 ```
 
-Or if installed as a package:
+**With activated environment:**
 ```bash
-autoresume run -r resume.tex -j job_url.txt
+# Activate first
+source .venv/bin/activate  # macOS/Linux
+.venv\Scripts\activate      # Windows
+
+# Then run
+python main.py run -r resume.tex -j job_url.txt
+```
+
+**Using installed CLI:**
+```bash
+uv run autoresume run -r resume.tex -j job_url.txt
 ```
 
 ### Command Line Options
@@ -59,6 +111,7 @@ autoresume run -r resume.tex -j job_url.txt
 - `-j, --job-url`: Path to `.txt` file containing the job URL (required)
 - `-o, --output-dir`: Output directory for modified files (default: same as resume)
 - `-m, --model`: Claude model to use (default: claude-sonnet-4-5-20250929)
+- `-y, --yes`: Skip confirmation prompt (useful for automation)
 
 ### Example Workflow
 

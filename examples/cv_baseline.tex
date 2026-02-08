@@ -1,0 +1,158 @@
+\documentclass{resume} % Use the custom resume.cls style
+\usepackage[dvipsnames]{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage[backend=biber, style=ieee, sorting=none]{biblatex}
+\addbibresource{references.bib}
+\usepackage[left=0.45in,top=0.2in,right=0.45in,bottom=0.2in]{geometry} % Document margins
+\newcommand{\tab}[1]{\hspace{.2667\textwidth}\rlap{#1}}
+\newcommand{\itab}[1]{\hspace{0em}\rlap{#1}}
+
+\begin{document}
+\begin{minipage}[t]{0.5\textwidth}
+    {\LARGE \bfseries Di (Candy) Kang} % Larger name
+\end{minipage}%
+\begin{minipage}[t]{0.5\textwidth}
+    \raggedleft % Align text to the right
+    \href{mailto:dikang@mit.edu}{Email} |
+    \href{https://tinyurl.com/dikang-linkedin}{LinkedIn} | 
+    \href{https://github.com/dikang13}{GitHub} |
+    \href{https://tinyurl.com/dikang-scholar}{Google Scholar}
+\end{minipage}
+
+\definecolor{MITRed}{RGB}{163, 31, 52}
+\renewenvironment{rSection}[1]{
+\sectionskip
+\textcolor{MITRed}{\textbf{\MakeUppercase{#1}}}
+\sectionlineskip
+\hrule
+\begin{list}{}{
+\setlength{\leftmargin}{1.0em}
+}
+\item[]
+}{
+\end{list}
+}
+
+\begin{rSection}{Professional Experience}
+\begin{rSubsection}{Postdoctoral Associate (short-term contract)}{Jan 2026 - now}{The Picower Institute of Learning and Memory}{\textit{Cambridge, MA}}
+    \item Designed data-efficient algorithms for 3D multi-object tracking, increasing objects identified by 10\%.
+    \item Constructed in-house knowledge graphs and orchestrated knowledge integration with agentic workflow.    
+    \item Building statistical models to predict neuronal signals from connectomics \& transcriptomics profiles.
+\end{rSubsection}
+
+\begin{rSubsection}{Graduate Research Assistant}{Sept 2020 - Dec 2025}{Massachusetts Institute of Technology}{\textit{Cambridge, MA}}
+  \item Trained deep learning models to improve accuracy of object detection tasks by 15\%.
+  \item Scaled computer vision pipeline for 3D rigid/non-rigid object tracking with apptainer; accelerated runtime by 3-fold with parallel processing on HPC clusters.
+  \item Developed statistical methods for signal processing, time series modeling and latent state inference.
+\end{rSubsection}
+
+\begin{rSubsection}{Real-World Evidence Analytics Intern}{Sept 2024 - Jan 2025}{Boehringer Ingelheim}{\textit{Ridgefield, CT}}
+  \item Prototyped an interactive dashboard for electronic health records \& claims from Flatiron, Optum, JMDC \& CPRD databases to support a cross-functional team in cardiometabolic therapeutic area.
+  \item Guided data collection for an oncology clinical trial by predicting survival outcomes from genomic biomarkers.  
+\end{rSubsection}
+
+\begin{rSubsection}{Research Assistant I}{Jul 2019 - Jul 2020}{Boston Children's Hospital}{\textit{Boston, MA}}
+  \item Built an online data processing pipeline for \textit{in vivo} electrophysiology recordings of mammalian visual perception.
+\end{rSubsection}
+
+\begin{rSubsection}{Medical Doctor}{Jul 2018 - Jun 2019}{Hospital Authority}{\textit{Hong Kong S.A.R.}}
+  \item Managed clinical cases in Internal Medicine, OBGYN \& Surgery; recognized as Best Intern by coworkers.
+\end{rSubsection}
+
+\begin{rSubsection}{Undergraduate Research Assistant}{Sept 2014 - May 2019}{Prince of Wales Hospital}{\textit{Hong Kong S.A.R.}}
+  \item Predicted clinical outcomes from sociodemographic determinants of health \& electronic health records.
+\end{rSubsection}
+
+\begin{rSubsection}{Undergraduate Research Intern}{Apr 2016 - Jun 2016}{Cambridge University Hospitals}{\textit{Cambridgeshire, United Kingdom}}
+  \item Cureated relational database for genome-wide association study (GWAS) on cerebral small vessel diseases.
+\end{rSubsection}
+
+\end{rSection}
+
+\begin{rSection}{Education}
+
+\begin{rSubsection}{Massachusetts Institute of Technology}{Sept 2020 - Dec 2025}{\textit{Ph.D. in Neuroscience}}{\textit{Cambridge, MA}}
+  \item Courses: Quantitative Methods \& Computational Models, Statistics, Systems Biology, Neurogenomics.
+  \item Thesis: State-dependent properties of brain-wide activity in freely behaving \textit{C. elegans}.
+\end{rSubsection}
+
+\begin{rSubsection}{The Chinese University of Hong Kong}{Sept 2012 - Jun 2018}{\textit{Bachelor of Medicine \& Bachelor of Surgery (M.B.Ch.B.)}}{\textit{Hong Kong S.A.R.}}
+  \item Courses: Biostatistics, Anatomy, Biochemistry, Physiology, Pathology, Pharmacology, Epidemiology.
+  \item Honors: Dean's List, Oncology Award, Distinction in Community Medicine, Distinction in Psychiatry.
+\end{rSubsection}
+\end{rSection}
+
+\begin{rSection}{Skills}
+\begin{tabular}{ @{} >{\bfseries}l @{\hspace{3ex}} l }
+Programming & Python (PyTorch, JAX, tensorflow, sklearn), R, Julia, MATLAB, SQL, Bash, LaTeX. \\
+Machine Learning & Feature extraction, dimensionality reduction, clustering, classification, regression, \\
+& deep learning frameworks (UNet, VAE, RNN, transformer), active learning, finetuning. \\
+Statistics & Hypothesis testing, failure analysis, signal processing, Bayesian inference. \\
+Clinical Informatics & Electronic health record, claims, medical codes, cohort study, survival analysis, HIPAA. \\
+Computer Vision & Image segmentation \& registration, motion tracking, multi-view geometry. \\
+CI/CD Platforms & Git, Docker, Apptainer, Databricks, Jupyter, HPC, SLURM, Google Cloud, LangChain. \\
+Data Visualization & Matplotlib, Seaborn, Plotly, ggplot2, RShiny, Quarto, Power BI, Tableau. \\
+\end{tabular}
+\end{rSection}
+
+\begin{rSection}{Publications}
+Adam AA, Lu AK, Goodell B, Kim J, Baskoylu S, \textbf{Kang D}, \textit{et al.} Deep Neural Networks to Register and Annotate the Cells of the \textit{C. elegans} Nervous System. \textit{eLife} 2025. doi:10.7554/eLife.108159.1
+
+Pradhan S, Madan GK, \textbf{Kang D}, \textit{et al.} Pathogen infection induces sickness behaviors by recruiting neuromodulatory systems linked to stress and satiety in \textit{C. elegans}. \textit{Nat Comm} 2025. doi:10.1038/s41467-025-58478-y
+
+Sonoda T, Stephany CE, Kelley K, \textbf{Kang D}, \textit{et al.} Experience instructs the refinement of feature-selectivity in the mouse primary visual thalamus. \textit{Neuron} 2025. doi:10.1101/2024.07.31.605460
+
+Dag U*, Nwabudike I*, \textbf{Kang D*}, \textit{et al.} Dissecting the functional organization of the \textit{C. elegans} serotonergic system at whole-brain scale. \textit{Cell} 2023. doi:10.1016/j.cell.2023.04.023
+
+Adam AA*, Kim J*, Wang Z, \textit{[...],} \textbf{Kang D}, \textit{et al.} Brain-wide representations of behavior spanning multiple timescales and states in \textit{C. elegans}. \textit{Cell} 2023. doi: 10.1016/j.cell.2023.07.035
+
+\textbf{Kang D}, Wong A, Fu J, \textit{et al.} Can transcranial Doppler ultrasound be used for screening cerebral small vessel diseases in the community? \textit{J Neurol Sci
+} 2019. doi: 10.1016/j.jns.2019.116439
+
+\textbf{Kang D}, Mok CC. Management of Psychosis in Neuropsychiatric Lupus. \textit{J Clin Rheumatol Immunol
+} 2019. doi:10.1142/S2661341719300015
+
+\textbf{Kang D*}, Tsang PM*, Li TL*, \textit{et al.} Determinants of medication adherence and blood pressure control among hypertensive patients in Hong Kong: A cross-sectional study. \textit{Int J Cardiol} 2015. doi:10.1016/j.ijcard.2014.12.064
+
+\textbf{*Equal Contribution}\hfill \textbf{Total Citations 380+}
+\end{rSection}
+
+\begin{rSection}{Conference Presentations}
+\textbf{SIAM Conference on Applications of Dynamical Systems} \hfill 2025 \\
+\textbf{Gordon Research Conference - Neuroethology: Behavior, Evolution and Neurobiology} \hfill 2023 \\
+\textbf{Computational and Systems Neuroscience (COSYNE)} \hfill 2023 \\
+\textbf{European Stroke Organization Conference} \hfill 2016 \\
+\textbf{World Congress of International Society for Vascular Behavioral \& Cognitive Disorders} \hfill 2015 \\
+\end{rSection}
+\vspace{-1em}
+
+\begin{rSection}{Certifications}
+\certification{Hong Kong Medical Council}{Jul 2019 - Now}{Medical Practitioner Registration No. M19414}
+
+\certification{American Heart Association}{2019}{Advanced Cardiovascular Life Support}{}
+\end{rSection}
+
+\begin{rSection}{Awards}
+\textbf{MathWorks Science Fellowship} \hfill 2024 \\
+\textbf{MIT Walle Nauta Award for Excellence in Undergraduate Teaching} \hfill 2023 \\
+\textbf{MIT Angus McDonald Award for Excellence in Undergraduate Teaching} \hfill 2022 \\
+\textbf{Hong Kong College of Physician Scholarship for Medical Students} \hfill 2018 \\
+\textbf{Hong Kong S.A.R. Information \& Technology Scholarship} \hfill 2016 \\
+\end{rSection}
+\vspace{-1em}
+
+\begin{rSection}{Leadership \& Service}
+\begin{rSubsection}{MIT Summer Research Program in Biology}{2024 -- 2025}{Mentor}{}
+    \item Mentored an undergraduate STEM major on scientific research and career development.
+\end{rSubsection}
+
+\begin{rSubsection}{MIT Brain \& Cognitive Sciences Application Assistance Program}{2020 -- 2024}{Program Coordinator}{}
+    \item Broke information barriers in graduate applications to bring talents from diverse backgrounds to STEM.
+\end{rSubsection}
+
+\begin{rSubsection}{AGAPE Hong Kong}{2014 -- 2016}{Founding Member}{}
+    \item Joined efforts with local NGOs to launch public campaigns against HIV and child rape in rural China \& Nepal.
+\end{rSubsection}
+
+\end{rSection}
+\end{document}

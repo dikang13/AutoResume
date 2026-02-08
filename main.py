@@ -56,11 +56,19 @@ def cli():
     default="claude-sonnet-4-5-20250929",
     help="Model to use (default: claude-sonnet-4-5-20250929)"
 )
+@click.option(
+    "--yes",
+    "-y",
+    is_flag=True,
+    default=False,
+    help="Skip confirmation prompt"
+)
 def run(
     resume: str,
     job_url: str,
     output_dir: Optional[str],
-    model: str
+    model: str,
+    yes: bool
 ):
     """
     Run the resume agent to tailor your resume and generate a cover letter.
@@ -93,8 +101,8 @@ def run(
     console.print(f"  Model: {model}")
     console.print()
 
-    # Confirm before proceeding
-    if not Confirm.ask("Start the agent?", default=True):
+    # Confirm before proceeding (unless --yes flag is used)
+    if not yes and not Confirm.ask("Start the agent?", default=True):
         console.print("Cancelled.")
         return
 
