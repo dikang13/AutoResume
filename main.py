@@ -48,7 +48,7 @@ def cli():
     "-o",
     type=click.Path(),
     default=None,
-    help="Output directory for modified files (default: same as resume)"
+    help="Output directory for modified files (default: same directory as job URL file)"
 )
 @click.option(
     "--model",

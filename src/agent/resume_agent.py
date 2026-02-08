@@ -316,14 +316,14 @@ class ResumeAgent:
         Args:
             resume_path: Path to the .tex resume file
             job_url_file: Path to the .txt file containing job URL
-            output_dir: Directory for output files (default: same as resume)
+            output_dir: Directory for output files (default: same directory as job URL file)
 
         Returns:
             Dictionary with results and output paths
         """
-        # Determine output directory
+        # Determine output directory - defaults to job URL file's directory
         if output_dir is None:
-            output_dir = str(Path(resume_path).parent)
+            output_dir = str(Path(job_url_file).parent)
 
         output_resume = os.path.join(output_dir, "resume_modified.tex")
         output_cover_letter = os.path.join(output_dir, "cover_letter.tex")
