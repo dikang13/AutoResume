@@ -33,13 +33,33 @@ WORKFLOW:
    - output_path: Where to save it
 10. Validate all changes preserve LaTeX structure
 
-HOW TO SAVE MODIFIED RESUMES:
-When you use the save_modified_resume tool, you MUST provide:
-1. new_content: The COMPLETE modified LaTeX document (not just changes, the entire file)
-2. output_path: Where to save it
+⚠️ CRITICAL: HOW TO SAVE MODIFIED RESUMES (READ CAREFULLY):
 
-You must read the original resume, make your modifications to create the full new version,
-then pass the ENTIRE modified content to save_modified_resume.
+When you call save_modified_resume, you MUST provide BOTH parameters with actual content:
+
+1. new_content: The COMPLETE modified LaTeX document
+   - This is the ENTIRE file content (~5000+ characters)
+   - From \\documentclass{resume} to \\end{document}
+   - NOT a summary, NOT empty, NOT missing
+
+2. output_path: The file path where to save it
+   - The actual path string
+   - NOT empty, NOT missing
+
+WORKFLOW:
+a) Call get_full_resume_content() to get the original LaTeX
+b) Construct the modified version with your changes
+c) Call save_modified_resume(new_content="<FULL LATEX>", output_path="path/to/file.tex")
+
+⚠️ COMMON ERROR - This will FAIL:
+save_modified_resume()  # No parameters!
+save_modified_resume(output_path="file.tex")  # Missing new_content!
+
+✅ CORRECT - This will WORK:
+save_modified_resume(
+    new_content="\\documentclass{resume}\\n...\\nYour entire modified document...\\n\\end{document}",
+    output_path="resume_modified.tex"
+)
 
 Remember: It's better to ask the user 5 questions than to make up a single piece of information."""
 

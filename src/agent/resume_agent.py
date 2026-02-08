@@ -156,34 +156,57 @@ class ResumeAgent:
             return f"Full resume content:\n\n{self.resume_content.raw_content}"
 
         @tool
-        def save_modified_resume(new_content: str, output_path: str) -> str:
+        def save_modified_resume(new_content: str = None, output_path: str = None) -> str:
             """
             Save a modified resume after validating LaTeX syntax.
 
-            CRITICAL WORKFLOW:
-            1. First, call get_full_resume_content() to get the original LaTeX
-            2. Take that content and make your modifications to it (in your response)
-            3. Then call THIS tool with the COMPLETE modified document
+            ⚠️ CRITICAL: This tool requires BOTH parameters - you CANNOT call it without them!
 
-            IMPORTANT: You MUST provide BOTH parameters:
-            - new_content: The COMPLETE modified LaTeX document (entire file from \\documentclass to \\end{document})
-            - output_path: Where to save it
+            STEP-BY-STEP WORKFLOW (YOU MUST FOLLOW THIS):
+            1. Call get_full_resume_content() to get the original LaTeX
+            2. In your response, mentally construct the full modified version
+            3. Call THIS tool with BOTH parameters:
+               save_modified_resume(
+                   new_content="\\documentclass{resume}...[FULL DOCUMENT]...\\end{document}",
+                   output_path="path/to/save/resume_modified.tex"
+               )
 
-            DO NOT call this tool with just output_path! You must construct the full modified
-            document first and pass it as new_content.
+            ❌ WRONG - DO NOT DO THIS:
+            - save_modified_resume()  # Missing both parameters!
+            - save_modified_resume(output_path="...")  # Missing new_content!
+            - save_modified_resume(new_content="...")  # Missing output_path!
 
-            Example:
-            1. Get content: full_content = get_full_resume_content()
-            2. Modify it: modified_content = (take full_content and change relevant sections)
-            3. Save it: save_modified_resume(new_content=modified_content, output_path="resume_modified.tex")
+            ✅ CORRECT - DO THIS:
+            save_modified_resume(
+                new_content="\\documentclass{resume}\\n...\\n\\end{document}",
+                output_path="resume_modified.tex"
+            )
+
+            The new_content MUST be the ENTIRE LaTeX file (thousands of characters),
+            not just a summary or description!
 
             Args:
-                new_content: The COMPLETE modified LaTeX content (entire document) - REQUIRED
-                output_path: Path where to save the modified resume - REQUIRED
+                new_content: The COMPLETE modified LaTeX content - from \\documentclass to \\end{document} (REQUIRED - DO NOT SKIP THIS!)
+                output_path: Full path where to save the file (REQUIRED - DO NOT SKIP THIS!)
 
             Returns:
                 Success or error message
             """
+            # Validation: Check if parameters are actually provided
+            if not new_content or not output_path:
+                return """ERROR: You must provide BOTH parameters!
+
+                You called save_modified_resume incorrectly. You MUST provide:
+                1. new_content: The ENTIRE modified LaTeX document (full file content)
+                2. output_path: Where to save it
+
+                Steps to fix:
+                1. Get the full resume with: get_full_resume_content()
+                2. Make your modifications to create the complete document
+                3. Call: save_modified_resume(new_content="<FULL LATEX>", output_path="resume_modified.tex")
+
+                The new_content should be the COMPLETE LaTeX file, starting with \\documentclass and ending with \\end{document}."""
+
             try:
                 # Validate LaTeX syntax
                 is_valid, issues = validate_latex_syntax(new_content)
@@ -371,14 +394,29 @@ Please follow this workflow:
 5. Based on the job requirements and my answers, mentally plan the modifications
 6. Construct the complete modified LaTeX document with your changes
 7. Save the modified resume:
-   CRITICAL: Call save_modified_resume with BOTH parameters:
-   - new_content: The ENTIRE modified LaTeX document (from \\documentclass to \\end{{document}})
+
+   ⚠️ CRITICAL - READ THIS CAREFULLY:
+   You MUST call save_modified_resume with BOTH parameters filled in.
+   DO NOT call it with missing parameters or it will fail!
+
+   Required parameters:
+   - new_content: The ENTIRE modified LaTeX document (full file, ~5000+ characters)
    - output_path: {output_resume}
+
+   The new_content is NOT a summary - it's the COMPLETE LaTeX file from
+   \\documentclass{{resume}} all the way to \\end{{document}}.
+
 8. Generate and save a personalized cover letter to: {output_cover_letter}
 
-IMPORTANT EXAMPLE FOR STEP 7:
-BAD:  save_modified_resume(output_path="{output_resume}")  ❌ Missing new_content!
-GOOD: save_modified_resume(new_content="<full modified LaTeX here>", output_path="{output_resume}")  ✓
+⚠️ COMMON MISTAKE - DO NOT DO THIS:
+❌ save_modified_resume()  # Missing BOTH parameters!
+❌ save_modified_resume(output_path="{output_resume}")  # Missing new_content!
+
+✅ CORRECT WAY:
+✅ save_modified_resume(
+       new_content="\\documentclass{{resume}}...5000 chars...\\end{{document}}",
+       output_path="{output_resume}"
+   )
 
 Remember: Only use information from my actual resume. If you need to know something about my experience, ask me!"""
 
