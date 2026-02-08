@@ -167,7 +167,7 @@ class ResumeAgent:
             2. In your response, mentally construct the full modified version
             3. Call THIS tool with BOTH parameters:
                save_modified_resume(
-                   new_content="\\documentclass{resume}...[FULL DOCUMENT]...\\end{document}",
+                   new_content="\\\\documentclass{{resume}}...[FULL DOCUMENT]...\\\\end{{document}}",
                    output_path="path/to/save/resume_modified.tex"
                )
 
@@ -178,7 +178,7 @@ class ResumeAgent:
 
             ✅ CORRECT - DO THIS:
             save_modified_resume(
-                new_content="\\documentclass{resume}\\n...\\n\\end{document}",
+                new_content="\\\\documentclass{{resume}}\\\\n...\\\\n\\\\end{{document}}",
                 output_path="resume_modified.tex"
             )
 
@@ -186,7 +186,7 @@ class ResumeAgent:
             not just a summary or description!
 
             Args:
-                new_content: The COMPLETE modified LaTeX content - from \\documentclass to \\end{document} (REQUIRED - DO NOT SKIP THIS!)
+                new_content: The COMPLETE modified LaTeX content - from \\\\documentclass to \\\\end{{document}} (REQUIRED - DO NOT SKIP THIS!)
                 output_path: Full path where to save the file (REQUIRED - DO NOT SKIP THIS!)
 
             Returns:
@@ -205,7 +205,7 @@ class ResumeAgent:
                 2. Make your modifications to create the complete document
                 3. Call: save_modified_resume(new_content="<FULL LATEX>", output_path="resume_modified.tex")
 
-                The new_content should be the COMPLETE LaTeX file, starting with \\documentclass and ending with \\end{document}."""
+                The new_content should be the COMPLETE LaTeX file, starting with \\\\documentclass and ending with \\\\end{{document}}."""
 
             try:
                 # Validate LaTeX syntax

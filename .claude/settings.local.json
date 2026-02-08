@@ -16,7 +16,8 @@
       "Bash(uv lock:*)",
       "Bash(uv sync:*)",
       "Bash(uv tree:*)",
-      "Bash(uv run python:*)"
+      "Bash(uv run python:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
