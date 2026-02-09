@@ -63,12 +63,20 @@ def cli():
     default=False,
     help="Skip confirmation prompt"
 )
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    default=False,
+    help="Enable verbose output (show agent thinking)"
+)
 def run(
     resume: str,
     job_url: str,
     output_dir: Optional[str],
     model: str,
-    yes: bool
+    yes: bool,
+    verbose: bool
 ):
     """
     Run the resume agent to tailor your resume and generate a cover letter.
@@ -110,7 +118,7 @@ def run(
 
     try:
         # Create agent
-        config = ResumeAgentConfig(model_name=model)
+        config = ResumeAgentConfig(model_name=model, verbose=verbose)
         agent = ResumeAgent(
             config=config,
             user_input_callback=user_input_callback
@@ -128,14 +136,33 @@ def run(
 
         if result.get("success"):
             console.print(Panel.fit(
-                "[bold green][SUCCESS][/bold green]\n\n"
-                f"Modified resume: {result['resume_path']}\n"
-                f"Cover letter: {result['cover_letter_path']}",
+                "[bold green]✅ SUCCESS[/bold green]\n\n"
+                f"📄 Tailored Experiences: {result.get('tailored_experiences_path', 'N/A')}\n"
+                f"   (Resume: {result.get('resume_path', 'N/A')})\n"
+                f"   (Cover Letter: {result.get('cover_letter_path', 'N/A')})",
                 border_style="green"
             ))
 
             console.print("\n[bold]Agent Output:[/bold]")
-            console.print(Panel(result["output"], border_style="blue"))
+            output = result["output"]
+            # Handle cases where output is a list of content blocks
+            # (e.g., [{'text': '...', 'type': 'text'}]) instead of a string
+            if isinstance(output, list):
+                output = "\n".join(
+                    block.get("text", str(block)) if isinstance(block, dict) else str(block)
+                    for block in output
+                )
+            elif not isinstance(output, str):
+                output = str(output)
+            console.print(Panel(Markdown(output), border_style="blue"))
+
+            # Show preview of tailored experiences if file exists
+            tailored_path = result.get('tailored_experiences_path')
+            if tailored_path and Path(tailored_path).exists():
+                console.print("\n[bold]Preview of Tailored Experiences:[/bold]")
+                with open(tailored_path, 'r', encoding='utf-8') as f:
+                    preview = f.read()[:500]  # First 500 chars
+                    console.print(Panel(preview + ("..." if len(preview) >= 500 else ""), border_style="cyan", title="tailored_experiences.txt"))
 
         else:
             console.print(Panel.fit(

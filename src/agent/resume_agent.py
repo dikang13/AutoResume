@@ -9,6 +9,7 @@ from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain.tools import tool
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
 from ..tools.job_fetcher import fetch_job_description, read_job_url_from_file
 from ..tools.latex_parser import (
@@ -26,8 +27,9 @@ class ResumeAgentConfig(BaseModel):
 
     model_name: str = Field(default="claude-sonnet-4-5-20250929")
     temperature: float = Field(default=0.2)
-    max_iterations: int = Field(default=15)
+    max_iterations: int = Field(default=25)
     api_key: Optional[str] = Field(default=None)
+    verbose: bool = Field(default=False)
 
 
 class ResumeAgent:
@@ -75,6 +77,7 @@ class ResumeAgent:
         self.resume_content = None
         self.resume_path = None
         self.user_context = {}
+        self.full_content_retrieved = False  # Track if agent has called get_full_resume_content
 
         # User profile management
         self.profile_manager = UserProfileManager()
@@ -133,6 +136,11 @@ class ResumeAgent:
                 result = "Resume loaded successfully!\n\n"
                 result += f"Sections found: {', '.join(resume.sections.keys())}\n\n"
 
+                # Check for .cls files
+                cls_files = list(Path(file_path).parent.glob("*.cls"))
+                if cls_files:
+                    result += f"Note: Found formatting files {[f.name for f in cls_files]} - these will be automatically copied when you save the modified resume.\n\n"
+
                 # Extract plain text for analysis
                 plain_text = extract_text_content(resume.raw_content)
                 result += f"Content preview:\n{plain_text[:1500]}"
@@ -153,59 +161,105 @@ class ResumeAgent:
             if self.resume_content is None:
                 return "Error: No resume has been loaded yet. Use read_resume first."
 
+            # Mark that the agent has retrieved the full content
+            self.full_content_retrieved = True
+
             return f"Full resume content:\n\n{self.resume_content.raw_content}"
 
         @tool
-        def save_modified_resume(new_content: str = None, output_path: str = None) -> str:
+        def save_modified_resume(
+            new_content: Annotated[str, Field(
+                description="REQUIRED: The COMPLETE modified LaTeX document from \\documentclass to \\end{document}. Must be 1000+ characters containing the entire file, NOT a summary. You MUST call get_full_resume_content() first to get this content, then modify it, then pass the complete modified version here."
+            )] = "",
+            output_path: str = None
+        ) -> str:
             """
             Save a modified resume after validating LaTeX syntax.
 
-            ⚠️ CRITICAL: This tool requires BOTH parameters - you CANNOT call it without them!
+            ⚠️⚠️⚠️ CRITICAL REQUIREMENT ⚠️⚠️⚠️
 
-            STEP-BY-STEP WORKFLOW (YOU MUST FOLLOW THIS):
-            1. Call get_full_resume_content() to get the original LaTeX
-            2. In your response, mentally construct the full modified version
-            3. Call THIS tool with BOTH parameters:
-               save_modified_resume(
-                   new_content="\\\\documentclass{{resume}}...[FULL DOCUMENT]...\\\\end{{document}}",
-                   output_path="path/to/save/resume_modified.tex"
-               )
+            The new_content parameter MUST contain the COMPLETE modified LaTeX document.
+            This means the ENTIRE file - typically 5000+ characters - from start to finish.
 
-            ❌ WRONG - DO NOT DO THIS:
-            - save_modified_resume()  # Missing both parameters!
-            - save_modified_resume(output_path="...")  # Missing new_content!
-            - save_modified_resume(new_content="...")  # Missing output_path!
+            REQUIRED WORKFLOW:
 
-            ✅ CORRECT - DO THIS:
-            save_modified_resume(
-                new_content="\\\\documentclass{{resume}}\\\\n...\\\\n\\\\end{{document}}",
-                output_path="resume_modified.tex"
-            )
+            Step 1: Get original content
+                Call: get_full_resume_content()
+                Returns: Full LaTeX document (~5000 chars)
 
-            The new_content MUST be the ENTIRE LaTeX file (thousands of characters),
-            not just a summary or description!
+            Step 2: Apply modifications mentally
+                Keep the ENTIRE document with your changes in memory
+
+            Step 3: Call save_modified_resume with FULL document
+                save_modified_resume(new_content="\\\\documentclass{{...}}...\\\\end{{document}}")
+
+            EXAMPLE OF CORRECT USAGE:
+            save_modified_resume(new_content="\\\\documentclass{{moderncv}}{{11pt,a4paper}}\\\\usepackage[utf8]{{inputenc}}\\\\name{{Jane}}{{Smith}}\\\\begin{{document}}\\\\makecvtitle\\\\section{{Experience}}\\\\cventry{{2020--2024}}{{Engineer}}{{Company}}{{}}{{}}{{Built ML systems}}\\\\end{{document}}")
+
+            ❌ WRONG (these FAIL):
+            save_modified_resume()  # No parameter!
+            save_modified_resume(new_content="")  # Empty!
+            save_modified_resume(new_content="Modified skills")  # Description not content!
 
             Args:
-                new_content: The COMPLETE modified LaTeX content - from \\\\documentclass to \\\\end{{document}} (REQUIRED - DO NOT SKIP THIS!)
-                output_path: Full path where to save the file (REQUIRED - DO NOT SKIP THIS!)
+                new_content: COMPLETE modified LaTeX (REQUIRED - 1000+ chars)
+                output_path: Save location (OPTIONAL - auto-set)
 
             Returns:
                 Success or error message
             """
-            # Validation: Check if parameters are actually provided
-            if not new_content or not output_path:
-                return """ERROR: You must provide BOTH parameters!
+            # CRITICAL CHECK: Ensure agent has retrieved the full content first
+            if not self.full_content_retrieved:
+                return """ERROR: You must call get_full_resume_content() FIRST!
 
-                You called save_modified_resume incorrectly. You MUST provide:
-                1. new_content: The ENTIRE modified LaTeX document (full file content)
-                2. output_path: Where to save it
+                WORKFLOW VIOLATION: You tried to save_modified_resume without first getting the content.
+
+                YOU MUST FOLLOW THIS EXACT SEQUENCE:
+                1. Call: get_full_resume_content()
+                   This returns the COMPLETE LaTeX (~5000 chars)
+
+                2. Apply your modifications to that content
+                   Keep the ENTIRE document with changes in memory
+
+                3. Call: save_modified_resume(new_content="<COMPLETE MODIFIED LATEX>")
+                   Pass the FULL modified document as the parameter
+
+                Do NOT skip step 1! You cannot modify content you haven't retrieved."""
+
+            # Use default output path if not provided
+            if output_path is None:
+                output_path = self.output_resume_path
+
+            # Validation: Check if new_content is actually provided
+            if not new_content:
+                return """ERROR: You must provide the new_content parameter!
+
+                You called save_modified_resume without the required new_content.
 
                 Steps to fix:
                 1. Get the full resume with: get_full_resume_content()
                 2. Make your modifications to create the complete document
-                3. Call: save_modified_resume(new_content="<FULL LATEX>", output_path="resume_modified.tex")
+                3. Call: save_modified_resume(new_content="<FULL LATEX>")
 
                 The new_content should be the COMPLETE LaTeX file, starting with \\\\documentclass and ending with \\\\end{{document}}."""
+
+            # Check if content seems too short to be a full document
+            if len(new_content) < 500:
+                return f"""ERROR: new_content is too short ({len(new_content)} chars)!
+
+                The new_content must be the COMPLETE modified LaTeX document.
+                A full resume is typically 3000-10000 characters.
+
+                You provided: "{new_content[:200]}..."
+
+                This looks like a description or partial content, NOT the full document.
+
+                CORRECT approach:
+                1. Call get_full_resume_content() → Returns ~5000 chars
+                2. Apply modifications to the ENTIRE document
+                3. Pass the COMPLETE modified document (all 5000+ chars) to save_modified_resume
+
+                The parameter should contain the FULL LaTeX from \\\\documentclass to \\\\end{{document}}."""
 
             try:
                 # Validate LaTeX syntax
@@ -216,6 +270,24 @@ class ResumeAgent:
 
                 # Save the file
                 write_latex_resume(output_path, new_content)
+
+                # Copy .cls files if they exist alongside the original resume
+                if self.resume_path:
+                    import shutil
+                    import glob
+                    resume_dir = Path(self.resume_path).parent
+                    output_dir = Path(output_path).parent
+
+                    # Copy all .cls files from source to destination
+                    cls_files = list(resume_dir.glob("*.cls"))
+                    copied_files = []
+                    for cls_file in cls_files:
+                        dest_cls = output_dir / cls_file.name
+                        shutil.copy(cls_file, dest_cls)
+                        copied_files.append(cls_file.name)
+
+                    if copied_files:
+                        return f"Resume saved successfully to {output_path}\nCopied formatting files: {', '.join(copied_files)}"
 
                 return f"Resume saved successfully to {output_path}"
             except Exception as e:
@@ -244,17 +316,21 @@ class ResumeAgent:
                 return "User input not available in this context."
 
         @tool
-        def save_cover_letter(content: str, output_path: str) -> str:
+        def save_cover_letter(content: str, output_path: str = None) -> str:
             """
             Save a generated cover letter.
 
             Args:
-                content: The cover letter content
-                output_path: Path where to save the cover letter
+                content: The cover letter content (REQUIRED)
+                output_path: Path where to save the cover letter (OPTIONAL - defaults to predetermined location)
 
             Returns:
                 Success or error message
             """
+            # Use default output path if not provided
+            if output_path is None:
+                output_path = self.output_cover_letter_path
+
             try:
                 with open(output_path, 'w', encoding='utf-8') as f:
                     f.write(content)
@@ -297,10 +373,90 @@ class ResumeAgent:
 
             return "Information saved to your profile for future sessions."
 
+        # Accumulator for tailored experiences
+        self.tailored_experiences = []
+        self.tailored_job_info = {"title": "", "company": ""}
+
+        @tool
+        def add_tailored_experience(
+            title: str,
+            company: str,
+            bullets: list[str]
+        ) -> str:
+            """
+            Add ONE tailored experience entry. Call this once for EACH relevant experience.
+
+            Args:
+                title: Job title for this experience (e.g. "Data Analyst")
+                company: Company name (e.g. "Boehringer Ingelheim")
+                bullets: List of 2-5 tailored bullet points for this experience
+
+            Returns:
+                Confirmation of the added experience
+            """
+            entry = {
+                "title": title,
+                "company": company,
+                "bullets": bullets
+            }
+            self.tailored_experiences.append(entry)
+            return f"Added experience #{len(self.tailored_experiences)}: {title} at {company} ({len(bullets)} bullets). Call add_tailored_experience again for the next experience, or call finalize_tailored_experiences when done."
+
+        @tool
+        def finalize_tailored_experiences(
+            target_job_title: str,
+            target_company: str,
+            key_skills: list[str]
+        ) -> str:
+            """
+            Finalize and save all tailored experiences to a text file.
+            Call this AFTER adding all experiences with add_tailored_experience.
+
+            Args:
+                target_job_title: The job you're applying for (e.g. "Clinical Data Analyst")
+                target_company: Company you're applying to (e.g. "Apple")
+                key_skills: List of key skills highlighted across all experiences
+
+            Returns:
+                Success or error message
+            """
+            if not self.tailored_experiences:
+                return "ERROR: No experiences added yet! Call add_tailored_experience first for each relevant experience."
+
+            # Build the output text
+            lines = []
+            lines.append(f"TAILORED EXPERIENCES FOR: {target_job_title} at {target_company}")
+            lines.append("=" * 70)
+            lines.append("")
+
+            for i, exp in enumerate(self.tailored_experiences, 1):
+                lines.append(f"{i}. {exp['title']} | {exp['company']}")
+                for bullet in exp['bullets']:
+                    lines.append(f"   • {bullet}")
+                lines.append("")
+
+            lines.append("-" * 70)
+            lines.append("KEY SKILLS HIGHLIGHTED:")
+            for skill in key_skills:
+                lines.append(f"   • {skill}")
+
+            content = "\n".join(lines)
+
+            # Save to file
+            output_path = str(Path(self.output_resume_path).parent / "tailored_experiences.txt")
+            try:
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                return f"Tailored experiences saved to {output_path} ({len(self.tailored_experiences)} experiences, {len(key_skills)} key skills)"
+            except Exception as e:
+                return f"Error saving: {str(e)}"
+
         return [
             fetch_job_from_url,
             read_resume,
             get_full_resume_content,
+            add_tailored_experience,
+            finalize_tailored_experiences,
             save_modified_resume,
             ask_user_question,
             save_cover_letter,
@@ -322,9 +478,9 @@ class ResumeAgent:
         return AgentExecutor(
             agent=agent,
             tools=self.tools,
-            verbose=True,
+            verbose=self.config.verbose,
             max_iterations=self.config.max_iterations,
-            handle_parsing_errors=True
+            handle_parsing_errors="Error occurred. When calling save_tailored_experiences, you MUST include content='your full text here' with all the tailored descriptions written out as a string."
         )
 
     def run(
@@ -351,6 +507,10 @@ class ResumeAgent:
         output_resume = os.path.join(output_dir, "resume_modified.tex")
         output_cover_letter = os.path.join(output_dir, "cover_letter.tex")
 
+        # Store output paths as instance variables for tools to use as defaults
+        self.output_resume_path = output_resume
+        self.output_cover_letter_path = output_cover_letter
+
         # Read job URL from file
         try:
             job_url = read_job_url_from_file(job_url_file)
@@ -370,7 +530,9 @@ class ResumeAgent:
                 profile_info += f"Known Skills: {', '.join(self.current_profile.skills[:10])}\n"
             if self.current_profile.notes:
                 profile_info += f"Notes: {'; '.join(self.current_profile.notes[-5:])}\n"
-            profile_info += "\nUse this information as context but always verify with the user if unsure.\n"
+            profile_info += "\n⚠️ IMPORTANT: This profile information is VERIFIED from previous sessions. "
+            profile_info += "Use it directly - DO NOT re-ask questions the user already answered. "
+            profile_info += "Only ask NEW clarifying questions if you need information NOT in this profile.\n"
         else:
             # Create new profile
             user_id = Path(resume_path).stem
@@ -381,42 +543,37 @@ class ResumeAgent:
             profile_info = "\n\n(First time working with this resume - learning about you as we go)\n"
 
         # Construct the initial prompt
-        initial_prompt = f"""I need help tailoring my resume and creating a cover letter for a job application.{profile_info}
+        initial_prompt = f"""I need help tailoring my resume for a specific job application.{profile_info}
 
 Resume file: {resume_path}
 Job URL: {job_url}
 
+PRIMARY TASK: Create tailored experience descriptions that highlight my relevant skills and achievements.
+
 Please follow this workflow:
-1. Fetch and analyze the job description
-2. Read and understand my resume structure
-3. Ask me any clarifying questions about my experience if needed (ONE question at a time)
-4. Use get_full_resume_content to get the complete LaTeX document
-5. Based on the job requirements and my answers, mentally plan the modifications
-6. Construct the complete modified LaTeX document with your changes
-7. Save the modified resume:
 
-   ⚠️ CRITICAL - READ THIS CAREFULLY:
-   You MUST call save_modified_resume with BOTH parameters filled in.
-   DO NOT call it with missing parameters or it will fail!
-
-   Required parameters:
-   - new_content: The ENTIRE modified LaTeX document (full file, ~5000+ characters)
-   - output_path: {output_resume}
-
-   The new_content is NOT a summary - it's the COMPLETE LaTeX file from
-   \\documentclass{{resume}} all the way to \\end{{document}}.
-
-8. Generate and save a personalized cover letter to: {output_cover_letter}
-
-⚠️ COMMON MISTAKE - DO NOT DO THIS:
-❌ save_modified_resume()  # Missing BOTH parameters!
-❌ save_modified_resume(output_path="{output_resume}")  # Missing new_content!
-
-✅ CORRECT WAY:
-✅ save_modified_resume(
-       new_content="\\documentclass{{resume}}...5000 chars...\\end{{document}}",
-       output_path="{output_resume}"
+1. Fetch and analyze the job description - identify key requirements and skills
+2. Read my resume to understand my background
+3. Check the USER PROFILE above - USE that information directly, don't re-ask answered questions
+4. Only ask NEW clarifying questions if needed (ONE question at a time)
+5. Identify my 3-5 most relevant experiences that match the job requirements
+6. For EACH relevant experience, call add_tailored_experience:
+   add_tailored_experience(
+       title="Job Title",
+       company="Company Name",
+       bullets=["Tailored bullet 1", "Tailored bullet 2", "Tailored bullet 3"]
    )
+   Make bullets catchy for recruiters and professional for hiring managers.
+   Use action verbs, quantifiable results, and mirror the job description language.
+
+7. After adding ALL experiences, call finalize_tailored_experiences:
+   finalize_tailored_experiences(
+       target_job_title="the job title",
+       target_company="the company name",
+       key_skills=["skill1", "skill2", "skill3"]
+   )
+
+Output will be saved to: {str(Path(output_resume).parent / 'tailored_experiences.txt')}
 
 Remember: Only use information from my actual resume. If you need to know something about my experience, ask me!"""
 
@@ -430,9 +587,22 @@ Remember: Only use information from my actual resume. If you need to know someth
                     notes=self.conversation_notes
                 )
 
+            tailored_experiences_path = str(Path(output_resume).parent / 'tailored_experiences.txt')
+
+            # Normalize output to a plain string (handles content block lists)
+            output = result["output"]
+            if isinstance(output, list):
+                output = "\n".join(
+                    block.get("text", str(block)) if isinstance(block, dict) else str(block)
+                    for block in output
+                )
+            elif not isinstance(output, str):
+                output = str(output)
+
             return {
                 "success": True,
-                "output": result["output"],
+                "output": output,
+                "tailored_experiences_path": tailored_experiences_path,
                 "resume_path": output_resume,
                 "cover_letter_path": output_cover_letter
             }
