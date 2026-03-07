@@ -1,7 +1,7 @@
 [project]
 name = "autoresume"
-version = "0.2.0"
-description = "LangChain agent for intelligent resume modification and cover letter generation"
+version = "0.3.0"
+description = "Multi-agent system for intelligent resume tailoring with LLM-as-judge feedback"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
@@ -30,6 +30,7 @@ dependencies = [
     "rich>=13.0.0",
     "click>=8.1.0",
     "lxml>=4.9.0",
+    "asciinema>=2.4.0",
 ]
 
 [project.optional-dependencies]
@@ -46,7 +47,7 @@ all = [
 ]
 
 [project.scripts]
-autoresume = "main:cli"
+autoresume = "autoresume.cli:cli"
 
 [dependency-groups]
 dev = [
@@ -54,6 +55,9 @@ dev = [
     "black>=23.0.0",
     "ruff>=0.1.0",
 ]
+
+[tool.setuptools.packages.find]
+include = ["autoresume*"]
 
 [tool.uv]
 package = true

@@ -1,1 +1,0 @@
-"""Resume agent implementation."""
