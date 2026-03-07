@@ -31,6 +31,7 @@ dependencies = [
     "click>=8.1.0",
     "lxml>=4.9.0",
     "asciinema>=2.4.0",
+    "agg>=0.3.1",
 ]
 
 [project.optional-dependencies]

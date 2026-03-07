@@ -1,0 +1,18 @@
+EMPLOYABILITY SCORE: 7/10
+
+REASONING:
+This candidate is a strong match with exceptional depth in core AI/ML and medical imaging domains. They demonstrate mastery of deep learning frameworks (PyTorch, TensorFlow), medical image analysis (segmentation, registration, 3D tracking), GPU programming, and have published research in computer vision. However, the PhD is in Neuroscience rather than the preferred AI/ML/CS disciplines, and there are notable gaps in traditional deep reinforcement learning, DICOM standards, and TensorRT experience—all mentioned as preferred or plus qualifications.
+
+WEAKNESSES:
+  - Limited traditional deep reinforcement learning (DRL) experience—candidate has built LLM-based AI agents but not RL-based decision-making systems
+  - No explicit DICOM standard experience mentioned, which is a desired qualification for medical imaging work
+  - No TensorRT experience mentioned, which is listed as a plus for optimization and deployment
+  - PhD in Neuroscience rather than AI/ML/CS/EE/CE/Bio-Engineering, though computational focus partially mitigates this
+  - No mention of ultrasound image processing experience, though candidate has worked with ultrasound imaging data
+
+INTERVIEW PREP QUESTIONS:
+  1. Your resume shows strong experience with LLM-based AI agents and workflow automation, but the role emphasizes deep reinforcement learning (DRL) frameworks for adaptive optimization. Can you describe your understanding of DRL and discuss whether you've considered applying RL methods to medical imaging problems? What would be your approach to learning DRL if hired?
+  2. Walk us through your experience with the 3D multi-object tracking and segmentation project mentioned in your resume. Specifically, how did you handle real-time processing requirements, and what GPU optimization techniques did you employ? How would you approach deploying such a model in a clinical setting?
+  3. You have clinical experience from your medical internship and work with electronic health records. Can you describe a specific instance where your clinical knowledge directly informed your AI/ML work, and how you would apply that interdisciplinary perspective to solving real-world problems for our surgical imaging platform?
+  4. The role requires familiarity with medical imaging standards and formats. While your resume mentions MRI and ultrasound work, there's no mention of DICOM. How would you approach learning DICOM standards, and what challenges do you anticipate in integrating DICOM data into deep learning pipelines?
+  5. Tell us about a time when you had to rapidly prototype and validate a new AI model under time constraints. How did you balance model complexity, validation rigor, and speed to market, and what would you do differently in a commercial medical device context versus research?

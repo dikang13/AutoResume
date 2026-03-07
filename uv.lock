@@ -7,6 +7,19 @@ resolution-markers = [
 ]
 
 [[package]]
+name = "agg"
+version = "0.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "userprovided", version = "1.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "userprovided", version = "2.2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/55/d3/6bea70f4de343683cfa523762816234a5e39a389bf063f0b7c1fee55db63/agg-0.3.1.tar.gz", hash = "sha256:26968c11c67595da007ec717f7fb10d49462bf251ad7943d7be606d5f4f3370a", size = 4462, upload-time = "2021-01-30T18:59:50.426Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4c/c5/b78dc4ca7878b8542aa533e52a096e77dfa1b2eb22c4fe36377ec6a3f306/agg-0.3.1-py3-none-any.whl", hash = "sha256:6b71bdde34616940553463f9b39d70318fca412e41d720db621947305b0acef9", size = 9197, upload-time = "2021-01-30T18:59:48.902Z" },
+]
+
+[[package]]
 name = "annotated-types"
 version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -71,6 +84,7 @@ name = "autoresume"
 version = "0.3.0"
 source = { editable = "." }
 dependencies = [
+    { name = "agg" },
     { name = "asciinema" },
     { name = "beautifulsoup4" },
     { name = "click", version = "8.1.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
@@ -117,6 +131,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "agg", specifier = ">=0.3.1" },
     { name = "asciinema", specifier = ">=2.4.0" },
     { name = "autoresume", extras = ["dev", "browser"], marker = "extra == 'all'" },
     { name = "beautifulsoup4", specifier = ">=4.12.0" },
@@ -2098,6 +2113,30 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz", hash = "sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed", size = 435556, upload-time = "2026-01-07T16:24:43.925Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/39/08/aaaad47bc4e9dc8c725e68f9d04865dbcb2052843ff09c97b08904852d84/urllib3-2.6.3-py3-none-any.whl", hash = "sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4", size = 131584, upload-time = "2026-01-07T16:24:42.685Z" },
+]
+
+[[package]]
+name = "userprovided"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version < '3.10'",
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ec/ed/b5cd2bdae9cb5674bceab3bfb9683dbce8451d677c2ef7f3ac312daf8a77/userprovided-1.0.0.tar.gz", hash = "sha256:4e05d7a8fd4d7ed18da47b15c1799f0db2f7d62a58456b12b0f19a5c2baf27f8", size = 18862, upload-time = "2023-10-10T19:24:21.154Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/49/ca/ab30ad9df9bbcb6e6147d70a2db099e20caaf780c76b68c72fa7e6206656/userprovided-1.0.0-py3-none-any.whl", hash = "sha256:162334b17a91629c5ba28832648a7aefa1619010f9330449370979b3ff44b983", size = 19384, upload-time = "2023-10-10T19:24:18.746Z" },
+]
+
+[[package]]
+name = "userprovided"
+version = "2.2.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.10'",
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7e/89/b03cee015c693aa84a36cecba7ebe3ce9f578ac08a12ee6b264e831922de/userprovided-2.2.0.tar.gz", hash = "sha256:04840495c3a1e1e00fdeef205632844c2c9de52dc4306af0291a869abac9435d", size = 34611, upload-time = "2026-02-14T00:32:14.25Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ae/35/49cde82d3e1d186865873ed4efe186f47713d69ee7250d8d19dc510f6edb/userprovided-2.2.0-py3-none-any.whl", hash = "sha256:a8ee34a5ad0d40657165072e17e983e1ac03d2544b741aee7cc30b28895926ff", size = 33793, upload-time = "2026-02-14T00:32:13.008Z" },
 ]
 
 [[package]]
