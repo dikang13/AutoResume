@@ -1,0 +1,80 @@
+--- baseline: cv_baseline.tex
+
++++ tailored: resume_tailored.tex
+
+@@ -35,15 +35,16 @@
+
+ 
+ \begin{rSection}{Professional Experience}
+ \begin{rSubsection}{Postdoctoral Associate (short-term contract)}{Jan 2026 - now}{The Picower Institute of Learning and Memory}{\textit{Cambridge, MA}}
+-    \item Designed data-efficient algorithms for 3D multi-object tracking, increasing objects identified by 10\%.
+-    \item Constructed in-house knowledge graphs and orchestrated knowledge integration with agentic workflow.    
++    \item Designed data-efficient deep learning algorithms for 3D multi-object tracking and segmentation, increasing objects identified by 10\%.
++    \item Developed AI agent frameworks for knowledge integration and workflow automation using LLM-based systems.    
+     \item Building statistical models to predict neuronal signals from connectomics \& transcriptomics profiles.
+ \end{rSubsection}
+ 
+ \begin{rSubsection}{Graduate Research Assistant}{Sept 2020 - Dec 2025}{Massachusetts Institute of Technology}{\textit{Cambridge, MA}}
+-  \item Trained deep learning models to improve accuracy of object detection tasks by 15\%.
+-  \item Scaled computer vision pipeline for 3D rigid/non-rigid object tracking with apptainer; accelerated runtime by 3-fold with parallel processing on HPC clusters.
++  \item Trained deep learning models (UNet, VAE, RNN, transformer) with PyTorch and TensorFlow to improve accuracy of 3D object detection and image segmentation tasks by 15\%.
++  \item Scaled computer vision pipeline for 3D rigid/non-rigid object tracking and image registration with GPU acceleration; accelerated runtime by 3-fold with parallel processing on HPC clusters.
+   \item Developed statistical methods for signal processing, time series modeling and latent state inference.
++  \item Implemented fast prototyping workflows for real-time image and video analysis on Linux systems.
+ \end{rSubsection}
+ 
+ \begin{rSubsection}{Real-World Evidence Analytics Intern}{Sept 2024 - Jan 2025}{Boehringer Ingelheim}{\textit{Ridgefield, CT}}
+@@ -57,23 +58,26 @@
+
+ 
+ \begin{rSubsection}{Medical Doctor}{Jul 2018 - Jun 2019}{Hospital Authority}{\textit{Hong Kong S.A.R.}}
+   \item Managed clinical cases in Internal Medicine, OBGYN \& Surgery; recognized as Best Intern by coworkers.
++  \item Interpreted medical images and clinical data to support diagnostic and treatment decisions.
+ \end{rSubsection}
+ 
+ \begin{rSubsection}{Undergraduate Research Assistant}{Sept 2014 - May 2019}{Prince of Wales Hospital}{\textit{Hong Kong S.A.R.}}
++  \item Analyzed voxel data from MRI scans and clinical metrics from transcranial ultrasound imaging.
+   \item Predicted clinical outcomes from sociodemographic determinants of health \& electronic health records.
+ \end{rSubsection}
+ 
+ \begin{rSubsection}{Undergraduate Research Intern}{Apr 2016 - Jun 2016}{Cambridge University Hospitals}{\textit{Cambridgeshire, United Kingdom}}
+-  \item Cureated relational database for genome-wide association study (GWAS) on cerebral small vessel diseases.
++  \item Curated relational database for genome-wide association study (GWAS) on cerebral small vessel diseases.
+ \end{rSubsection}
+ 
+ \end{rSection}
+ 
+ \begin{rSection}{Education}
+ 
+-\begin{rSubsection}{Massachusetts Institute of Technology}{Sept 2020 - Dec 2025}{\textit{Ph.D. in Neuroscience}}{\textit{Cambridge, MA}}
++\begin{rSubsection}{Massachusetts Institute of Technology}{Sept 2020 - Dec 2025}{\textit{Ph.D. in Neuroscience (Computational Focus)}}{\textit{Cambridge, MA}}
+   \item Courses: Quantitative Methods \& Computational Models, Statistics, Systems Biology, Neurogenomics.
+   \item Thesis: State-dependent properties of brain-wide activity in freely behaving \textit{C. elegans}.
++  \item Research focus: 3D multi-object tracking, computer vision, deep learning, medical image analysis.
+ \end{rSubsection}
+ 
+ \begin{rSubsection}{The Chinese University of Hong Kong}{Sept 2012 - Jun 2018}{\textit{Bachelor of Medicine \& Bachelor of Surgery (M.B.Ch.B.)}}{\textit{Hong Kong S.A.R.}}
+@@ -84,13 +88,17 @@
+
+ 
+ \begin{rSection}{Skills}
+ \begin{tabular}{ @{} >{\bfseries}l @{\hspace{3ex}} l }
+-Programming & Python (PyTorch, JAX, tensorflow, sklearn), R, Julia, MATLAB, SQL, Bash, LaTeX. \\
+-Machine Learning & Feature extraction, dimensionality reduction, clustering, classification, regression, \\
+-& deep learning frameworks (UNet, VAE, RNN, transformer), active learning, finetuning. \\
++Programming & Python (PyTorch, TensorFlow, Keras, sklearn), C/C++, R, Julia, MATLAB, SQL, Bash, LaTeX. \\
++Machine Learning & Deep learning (UNet, VAE, RNN, transformer), feature extraction, dimensionality reduction, \\
++& clustering, classification, regression, active learning, finetuning. \\
++Medical Imaging & Image segmentation, image registration, 3D/2D tracking, medical image analysis, MRI, \\
++& ultrasound imaging, voxel data processing, human anatomy knowledge. \\
++Computer Vision & Motion tracking, multi-view geometry, object detection, real-time processing. \\
+ Statistics & Hypothesis testing, failure analysis, signal processing, Bayesian inference. \\
+ Clinical Informatics & Electronic health record, claims, medical codes, cohort study, survival analysis, HIPAA. \\
+-Computer Vision & Image segmentation \& registration, motion tracking, multi-view geometry. \\
+-CI/CD Platforms & Git, Docker, Apptainer, Databricks, Jupyter, HPC, SLURM, Google Cloud, LangChain. \\
++AI Frameworks & AI agents (LLM-based frameworks), natural language processing, workflow automation. \\
++GPU \& HPC & GPU programming, parallel processing, HPC clusters, SLURM. \\
++CI/CD Platforms & Git, Docker, Apptainer, Databricks, Jupyter, Google Cloud, LangChain. \\
+ Data Visualization & Matplotlib, Seaborn, Plotly, ggplot2, RShiny, Quarto, Power BI, Tableau. \\
+ \end{tabular}
+ \end{rSection}

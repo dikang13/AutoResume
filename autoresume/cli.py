@@ -99,6 +99,7 @@ def run(
             console.print(Panel.fit(
                 "[bold green]Pipeline Complete[/bold green]\n\n"
                 f"Resume:     {tailoring.get('resume_path', 'N/A')}\n"
+                f"PDF:        {results.get('pdf_path', 'N/A')}\n"
                 f"Output Dir: {results.get('output_dir', 'N/A')}",
                 border_style="green",
             ))

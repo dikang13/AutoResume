@@ -189,3 +189,8 @@ LANGSMITH_API_KEY=optional_for_debugging
 - Integration with ATS (Applicant Tracking System) optimization
 - Resume scoring/feedback system
 - Multi-language support
+
+## Personal Preference
+- Use `uv` for installation and environment management
+- Update `README.md` automatically after a major change is implemented and tested (before `git commit` and `git push`)
+- Check with me when you see a serious security risk, such as exposing API keys to the public 

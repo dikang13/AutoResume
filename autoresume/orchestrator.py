@@ -2,6 +2,9 @@
 
 import os
 import re
+import subprocess
+import shutil
+import tempfile
 from typing import Optional, Callable, Dict, Any
 from pathlib import Path
 
@@ -171,6 +174,20 @@ def run_pipeline(
     _save_verdict(verdict, verdict_path)
     console.print(f"\n[dim]Feedback saved to {verdict_path}[/dim]")
 
+    # --- Stage 4: Save diff ---
+    diff_path = _save_diff(resume_path, tailor_result["resume_path"], output_dir)
+    if diff_path:
+        results["diff_path"] = diff_path
+        console.print(f"[green]Diff saved: {diff_path}[/green]")
+
+    # --- Stage 5: Compile PDF ---
+    pdf_path = _compile_pdf(tailor_result["resume_path"], resume_path)
+    if pdf_path:
+        results["pdf_path"] = pdf_path
+        console.print(f"[green]PDF compiled: {pdf_path}[/green]")
+    else:
+        console.print("\n[dim]PDF compilation skipped (pdflatex not available).[/dim]")
+
     results["success"] = True
     results["output_dir"] = output_dir
     return results
@@ -222,3 +239,120 @@ def _save_verdict(verdict: JudgeVerdict, path: str):
 
     with open(path, 'w', encoding='utf-8') as f:
         f.write("\n".join(lines))
+
+
+def _save_diff(baseline_path: str, tailored_path: str, output_dir: str) -> Optional[str]:
+    """Generate and save a unified diff between the baseline and tailored resume."""
+    import difflib
+
+    try:
+        baseline = Path(baseline_path).read_text(encoding="utf-8").splitlines()
+        tailored = Path(tailored_path).read_text(encoding="utf-8").splitlines()
+
+        diff_lines = list(difflib.unified_diff(
+            baseline,
+            tailored,
+            fromfile=f"baseline: {Path(baseline_path).name}",
+            tofile=f"tailored: {Path(tailored_path).name}",
+        ))
+
+        if not diff_lines:
+            return None
+
+        diff_text = "\n".join(diff_lines)
+
+        diff_path = str(Path(output_dir) / "changes.diff")
+        with open(diff_path, "w", encoding="utf-8") as f:
+            f.write(diff_text)
+
+        return diff_path
+    except Exception:
+        return None
+
+
+def _compile_pdf(tex_path: str, source_resume_path: str) -> Optional[str]:
+    """Compile the tailored .tex to PDF using pdflatex.
+
+    Falls back to stripping biblatex if the package is unavailable.
+    Returns the path to the PDF on success, None on failure.
+    """
+    if not shutil.which("pdflatex"):
+        return None
+
+    tex_path = Path(tex_path)
+    output_dir = tex_path.parent
+    pdf_name = tex_path.stem + ".pdf"
+
+    # First attempt: compile as-is
+    result = _run_pdflatex(str(tex_path), str(output_dir))
+    if result == 0:
+        pdf_path = output_dir / pdf_name
+        if pdf_path.exists():
+            _cleanup_latex_aux(tex_path)
+            return str(pdf_path)
+
+    # Check if it failed due to missing biblatex
+    log_path = output_dir / (tex_path.stem + ".log")
+    log_text = log_path.read_text(errors="ignore") if log_path.exists() else ""
+
+    if "biblatex.sty" in log_text or "File `biblatex.sty' not found" in log_text:
+        console.print("[dim]biblatex not installed, compiling without it...[/dim]")
+
+        # Create a version with biblatex commented out
+        content = tex_path.read_text(encoding="utf-8")
+        content = re.sub(
+            r"(\\usepackage\[.*biblatex.*\].*\{biblatex\})",
+            r"% \1  % commented out for compilation",
+            content,
+        )
+        content = re.sub(
+            r"(\\addbibresource\{.*\})",
+            r"% \1  % commented out for compilation",
+            content,
+        )
+
+        # Write temp file, compile, clean up
+        nobib_tex = output_dir / (tex_path.stem + "_nobib.tex")
+        nobib_tex.write_text(content, encoding="utf-8")
+
+        result = _run_pdflatex(str(nobib_tex), str(output_dir))
+        nobib_pdf = output_dir / (tex_path.stem + "_nobib.pdf")
+
+        if result == 0 and nobib_pdf.exists():
+            final_pdf = output_dir / pdf_name
+            nobib_pdf.rename(final_pdf)
+            # Clean up all _nobib aux files
+            for ext in [".tex", ".log", ".aux", ".out"]:
+                f = output_dir / (tex_path.stem + "_nobib" + ext)
+                f.unlink(missing_ok=True)
+            _cleanup_latex_aux(tex_path)
+            return str(final_pdf)
+        else:
+            # Clean up failed attempt
+            for ext in [".tex", ".log", ".aux", ".out", ".pdf"]:
+                f = output_dir / (tex_path.stem + "_nobib" + ext)
+                f.unlink(missing_ok=True)
+
+    console.print("[dim]PDF compilation failed. You can compile manually with pdflatex.[/dim]")
+    _cleanup_latex_aux(tex_path)
+    return None
+
+
+def _run_pdflatex(tex_path: str, output_dir: str) -> int:
+    """Run pdflatex and return the exit code."""
+    try:
+        result = subprocess.run(
+            ["pdflatex", "-interaction=nonstopmode", "-output-directory", output_dir, tex_path],
+            capture_output=True,
+            timeout=30,
+        )
+        return result.returncode
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return 1
+
+
+def _cleanup_latex_aux(tex_path: Path):
+    """Remove LaTeX auxiliary files."""
+    for ext in [".aux", ".log", ".out"]:
+        f = tex_path.with_suffix(ext)
+        f.unlink(missing_ok=True)

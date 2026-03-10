@@ -17,7 +17,17 @@
       "Bash(uv sync:*)",
       "Bash(uv tree:*)",
       "Bash(uv run python:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(ls:*)",
+      "Bash(sed:*)",
+      "Bash(DIR=\"/storage/fs/store1/candy/AutoResume/real_user/edda_research_scientist/edda_technology_ai_research_scientist_--_medical_applications\")",
+      "Bash(mv \"$DIR/resume_tailored_nobib.pdf\" \"$DIR/resume_tailored.pdf\")",
+      "Bash(rm -f \"$DIR/resume_tailored_nobib.tex\" \"$DIR/resume_tailored_nobib.log\" \"$DIR/resume_tailored_nobib.aux\" \"$DIR/resume_tailored_nobib.out\")",
+      "Read(//storage/fs/store1/candy/AutoResume/real_user/edda_research_scientist/edda_technology_ai_research_scientist_--_medical_applications/$DIR/**)",
+      "Bash(mv \"$DIR/_tmp.pdf\" \"$DIR/resume_tailored.pdf\")",
+      "Bash(rm -f \"$DIR/_tmp.tex\" \"$DIR/_tmp.aux\" \"$DIR/_tmp.log\" \"$DIR/_tmp.out\")",
+      "Bash(ln -sfn \"/storage/fs/store1/candy/AutoResume/real_user/edda_research_scientist/edda_technology_ai_research_scientist_--_medical_applications\" /tmp/edda_out)",
+      "Read(//tmp/edda_out/**)"
     ]
   }
 }
